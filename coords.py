@@ -7,7 +7,8 @@ print("Posicioná el mouse sobre el objetivo. Control+C en la consola para frena
 try:
     while True:
         x, y = pyautogui.position()
-        print(f"Coordenadas actuales -> X: {x}  Y: {y}", end="\r")
+        # \033[K es el código ANSI que borra la línea desde el cursor hasta el final
+        print(f"\033[KCoordenadas actuales -> X: {x}  Y: {y}", end="\r")
         time.sleep(0.15)
 except KeyboardInterrupt:
     print("\n\nProceso finalizado con éxito.")

@@ -6,197 +6,145 @@ import keyboard
 import sys
 import pytesseract
 
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
+# ==========================================
+# 1. RUTAS DE BOTONES Y SPRITES (FOTOS)
+# ==========================================
+BTN_REINICIO  = r"/home/pancho/Documentos/PokelikeBot/Sprites/restarRun.png"
+BTN_BATTLE    = r"/home/pancho/Documentos/PokelikeBot/Sprites/battleTower.png"
+BTN_GASTLY    = r"/home/pancho/Documentos/PokelikeBot/Sprites/gastly.png"
+CATCH_POKEMON = r"/home/pancho/Documentos/PokelikeBot/Sprites/catchPokemon.png"
 
-pytesseract.pytesseract.tesseract_cmd = r"C:\Brother\Pancho\tesseract.exe"
+BTN_KANTO  = r"/home/pancho/Documentos/PokelikeBot/Sprites/kanto.png"
+BTN_JOHTO  = r"/home/pancho/Documentos/PokelikeBot/Sprites/johto.png"
+BTN_HOENN  = r"/home/pancho/Documentos/PokelikeBot/Sprites/hoenn.png"
+BTN_SINNOH = r"/home/pancho/Documentos/PokelikeBot/Sprites/sinnoh.png"
+BTN_UNOVA  = r"/home/pancho/Documentos/PokelikeBot/Sprites/unova.png"
 
-
-# 1. COORDS Y FOTOS
-
-COORD_POKEBOLA = (888, 267)
-COORD_REINICIO = (1885, 140)
-
-# Primer botón (Reroll 1)
-REROLL_1_ALTO = (700, 745)
-REROLL_1_BAJO = (700, 795)
-
-# Segundo botón (Reroll 2)
-REROLL_2_ALTO = (960, 745)
-REROLL_2_BAJO = (960, 795)
-
-# Tercer botón (Reroll 3)
-REROLL_3_ALTO = (1210, 745)
-REROLL_3_BAJO = (1210, 795)
-
-#MENU
-COORD_BATTLE = (960, 570)
-COORD_BATTLECONTINUE = (960, 660)
-COORD_KANTO = (970, 215)
-COORD_JOHTO = (970, 290)
-COORD_HOENN = (970, 365)
-COORD_SINNOH = (970, 440)
-COORD_UNOVA = (970, 515)
-
-MAPA_REGIONES = {
-    "kanto": COORD_KANTO,
-    "johto": COORD_JOHTO,
-    "hoenn": COORD_HOENN,
-    "sinnoh": COORD_SINNOH,
-    "unova": COORD_UNOVA
+DICCIONARIO_REGIONES = {
+    "kanto": BTN_KANTO,
+    "johto": BTN_JOHTO,
+    "hoenn": BTN_HOENN,
+    "sinnoh": BTN_SINNOH,
+    "unova": BTN_UNOVA
 }
 
-#POKEMONES
-COORD_GASTLY = (726, 258)
+LISTA_ENTRENADORES = [
+    r"/home/pancho/Documentos/PokelikeBot/Sprites/aceTrainer.png",
+    r"/home/pancho/Documentos/PokelikeBot/Sprites/bugCatcher.png",
+    r"/home/pancho/Documentos/PokelikeBot/Sprites/fireSpitter.png",
+    r"/home/pancho/Documentos/PokelikeBot/Sprites/fisher.png",
+    r"/home/pancho/Documentos/PokelikeBot/Sprites/hiker.png",
+    r"/home/pancho/Documentos/PokelikeBot/Sprites/oldGuy.png",
+    r"/home/pancho/Documentos/PokelikeBot/Sprites/policeman.png",
+    r"/home/pancho/Documentos/PokelikeBot/Sprites/Scientist.png",
+    r"/home/pancho/Documentos/PokelikeBot/Sprites/teamRocket.png"
+]
 
-#FOTOS
- 
-LISTA_ENTRENADORES = [r"C:\Brother\Pancho\Script poke\Sprites/aceTrainer.png",
-                      r"C:\Brother\Pancho\Script poke\Sprites/bugCatcher.png",
-                      r"C:\Brother\Pancho\Script poke\Sprites/fireSpitter.png",
-                      r"C:\Brother\Pancho\Script poke\Sprites/fisher.png",
-                      r"C:\Brother\Pancho\Script poke\Sprites/hiker.png",
-                      r"C:\Brother\Pancho\Script poke\Sprites/oldGuy.png",
-                      r"C:\Brother\Pancho\Script poke\Sprites/policeman.png",
-                      r"C:\Brother\Pancho\Script poke\Sprites/Scientist.png",
-                      r"C:\Brother\Pancho\Script poke\Sprites/teamRocket.png"]
-
-MOVE_TUTOR = r"C:\Brother\Pancho\Script poke\Sprites/moveTutor.png"
-POKE_CENTER = r"C:\Brother\Pancho\Script poke\Sprites/pokeCenter.png"
-CATCH_POKEMON = r"C:\Brother\Pancho\Script poke\Sprites/catchPokemon.png"
-GRASS = r"C:\Brother\Pancho\Script poke\Sprites/grass.png"
-QUESTION_MARK = r"C:\Brother\Pancho\Script poke\Sprites/questionMark.png"
-MISTERY_TRAINER = r"C:\Brother\Pancho\Script poke\Sprites/misteryTrainer.png"
+MOVE_TUTOR      = r"/home/pancho/Documentos/PokelikeBot/Sprites/moveTutor.png"
+POKE_CENTER     = r"/home/pancho/Documentos/PokelikeBot/Sprites/pokeCenter.png"
+GRASS           = r"/home/pancho/Documentos/PokelikeBot/Sprites/grass.png"
+QUESTION_MARK   = r"/home/pancho/Documentos/PokelikeBot/Sprites/questionMark.png"
+MISTERY_TRAINER = r"/home/pancho/Documentos/PokelikeBot/Sprites/misteryTrainer.png"
 
 
-# 2. FUNCIONES
+# ==========================================
+# 2. FUNCIONES DE AUTOMATIZACIÓN
+# ==========================================
+
+def click_en_imagen(ruta_imagen, timeout=3, confidence=0.8, region_busqueda=(0, 0, 1920, 1080)):
+    """
+    Busca una imagen en pantalla y hace click en su centro.
+    Maneja los argumentos de confianza y región de forma segura.
+    """
+    inicio = time.time()
+    while time.time() - inicio < timeout:
+        try:
+            pos = pyautogui.locateCenterOnScreen(ruta_imagen, confidence=confidence, region=region_busqueda)
+            if pos is not None:
+                pyautogui.click(pos)
+                return True
+        except (pyautogui.ImageNotFoundException, Exception):
+            pass
+        time.sleep(0.1)
+    return False
 
 def iniciarRun():
-    print("Iniciando el bot...")
-    time.sleep(2)
+    print("Iniciando el bot visual optimizado...")
+    time.sleep(1)
     
-    if (battleTower()):
-        print("¡Estamos en la Battle Tower! Iniciando batalla...")
-        pyautogui.click(COORD_BATTLE)
+    # Mitad inferior de tu pantalla de la izquierda
+    mitad_inferior = (0, 540, 1920, 540)
+    
+    print("Buscando 'BATTLE TOWER' únicamente en la mitad inferior de la pantalla...")
+    if click_en_imagen(BTN_BATTLE, timeout=5, confidence=0.8, region_busqueda=mitad_inferior):
+        print("¡Botón 'Battle Tower' detectado e iniciado!")
     else:
-        print("¡Estamos en la Battle Tower! Iniciando batalla...")
-        pyautogui.click(COORD_BATTLECONTINUE)   
-    
-    #REGION A JUGAR
+        print("ERROR: No se encontró Battle Tower abajo.")
+        sys.exit(0)
+
+    time.sleep(1.5)
+
+    # SELECCIÓN DE REGIÓN
     seleccionRegion = "hoenn"
-    coordenadaClick = region(seleccionRegion)
+    print(f"Buscando el botón de la región {seleccionRegion.capitalize()}...")
+    ruta_foto_region = DICCIONARIO_REGIONES.get(seleccionRegion, BTN_HOENN)
     
-    print(f"Seleccionando región {seleccionRegion.capitalize()}...")
-    pyautogui.click(coordenadaClick)
-    time.sleep(0.1)
-
-    #POKEMON ELEGIDO
-    print("Seleccionando Gastly...")
-    pyautogui.click(COORD_GASTLY)
-    time.sleep(0.1)
-
-
-def battleTower():
-    captura = pyautogui.screenshot()
-    captura_np = np.array(captura)
-    captura_gris = cv2.cvtColor(captura_np, cv2.COLOR_RGB2GRAY)
-
-    texto_extraido = pytesseract.image_to_string(captura_gris)
-    texto_limpio = texto_extraido.lower()
-
-    if "continue" in texto_limpio:
-        return False
-    else:        
-        return True
-    
-def hacer_click_doble_zona(coord_alta, coord_baja):
-    pyautogui.click(coord_alta)
-    time.sleep(0.1)
-    pyautogui.click(coord_baja)
-
-def region(region_name):
-    captura = pyautogui.screenshot()
-    captura_np = np.array(captura)
-    captura_gris = cv2.cvtColor(captura_np, cv2.COLOR_RGB2GRAY)
-
-    texto_extraido = pytesseract.image_to_string(captura_gris)
-    texto_limpio = texto_extraido.lower()
-
-    if (region_name in texto_limpio):
-        return MAPA_REGIONES[region_name]
+    if click_en_imagen(ruta_foto_region, timeout=4, confidence=0.8):
+        print(f"¡Región {seleccionRegion.capitalize()} seleccionada con éxito!")
     else:
-        return COORD_HOENN
-    
+        print(f"No encontré el botón de {seleccionRegion}, intentando respaldar con Hoenn...")
+        click_en_imagen(BTN_HOENN, timeout=3, confidence=0.8)
+    time.sleep(0.5)
+
+    # SELECCIÓN DE POKÉMON INITIAL
+    print("Buscando a Gastly en la interfaz...")
+    if click_en_imagen(BTN_GASTLY, timeout=4, confidence=0.8):
+        print("¡Gastly seleccionado con éxito!")
+    else:
+        print("ERROR: No encontré la casilla de Gastly en pantalla.")
+    time.sleep(1.5)
+
 def buscarPokemon(pokemon_name):
     captura = pyautogui.screenshot()
-    captura_np = np.array(captura)
-    captura_gris = cv2.cvtColor(captura_np, cv2.COLOR_RGB2GRAY)
-
-    texto_extraido = pytesseract.image_to_string(captura_gris)
-    texto_limpio = texto_extraido.lower()
-
-    if (pokemon_name in texto_limpio):
-        return True
-    else:
-        return False
-
-
-def Reroll(pokemon_name):
-        # Slot 1
-    print("Reroll Slot 1...")
-    hacer_click_doble_zona(REROLL_1_ALTO, REROLL_1_BAJO)
-    if buscarPokemon(pokemon_name): return True
-
-    # Slot 2
-    print("Reroll Slot 2...")
-    hacer_click_doble_zona(REROLL_2_ALTO, REROLL_2_BAJO)
-    if buscarPokemon(pokemon_name): return True
-
-    # Slot 3
-    print("Reroll Slot 3...")
-    hacer_click_doble_zona(REROLL_3_ALTO, REROLL_3_BAJO)
-    if buscarPokemon(pokemon_name): return True
-
-    else: return False
-
-
+    texto_limpio = pytesseract.image_to_string(cv2.cvtColor(np.array(captura), cv2.COLOR_RGB2GRAY)).lower()
+    return pokemon_name in texto_limpio
 
 def seleccionarFirstPokemon():
-    pyautogui.click(COORD_POKEBOLA)
-
-    if(buscarPokemon("treecko")):
-        print("¡Treecko encontrado!")
-        sys.exit(0)
+    print("Abriendo la Pokébola inicial...")
+    
+    # NUEVO: Acotamos la búsqueda al área donde aparece la Pokébola inicial en tu juego
+    # Región: Arranca en X=150, Y=150 y creamos un recuadro de 300x300 píxeles.
+    # Bajamos la confianza a 0.65 para que ignore si tiene texto o ramas encima.
+    cuadrante_inicial = (150, 150, 300, 300)
+    
+    if click_en_imagen(CATCH_POKEMON, timeout=4, confidence=0.65, region_busqueda=cuadrante_inicial):
+        print("¡Pokébola detectada visualmente y clickeada!")
     else:
-        print("Reroll para encontrar Treecko...")
-        if Reroll("clamperl"):
-            print("¡Treecko encontrado en el reroll!")
-            sys.exit(0)
-        else:
-             # Reniciar RUN
-            print("No hubo suerte. Reiniciando run...")
-   
-            print("Entrando a la Pokébola...")
-            pyautogui.click(COORD_POKEBOLA)
-            time.sleep(0.1) 
+        print("No se encuentra la foto de la Pokébola en el cuadrante inicial.")
+        return False
         
-            print("Reiniciando run...")
-            pyautogui.click(COORD_REINICIO)
-            time.sleep(0.1)
-            
-            # Esperamos a que el mapa cargue de cero
-            time.sleep(0.2) 
-            return False
-   
+    time.sleep(0.8) 
 
-    
+    if buscarPokemon("treecko"):
+        print("¡Treecko encontrado en la primera tirada!")
+        return True
+    else:
+        print("Treecko no está. Forzando reinicio de run...")
+        
+        # Volvemos a buscar la foto en el cuadrante para cerrar el modal si es necesario
+        click_en_imagen(CATCH_POKEMON, timeout=2, confidence=0.8, region_busqueda=cuadrante_inicial)
+        time.sleep(0.3)
+        
+        if click_en_imagen(BTN_REINICIO, timeout=4, confidence=0.8):
+            print("¡Run reiniciada de forma segura por imagen!")
+        time.sleep(1.2) 
+        return False
 
-
-    
-
-
-    
-
+# ==========================================
 # 3. CICLO PRINCIPAL
+# ==========================================
 
 iniciarRun()
 time.sleep(1)
@@ -208,11 +156,13 @@ while True:
         sys.exit(0)
 
     if level == 0:
-        print("¡Empezando el nivel 1!")
-    seleccionarFirstPokemon()
-    level += 1
-
-    if level == 1:
-        print("¡Empezando el nivel 2!")
+        print("--- [Nivel 1: Fase de Selección] ---")
+        if seleccionarFirstPokemon():
+            print("¡Objetivo cumplido! Pasando al Nivel 2...")
+            level = 1
+            
+    elif level == 1:
+        print("¡Fase 2 Iniciada! El bot frena acá.")
+        sys.exit(0)
     
-time.sleep(0.1)
+    time.sleep(0.1)
