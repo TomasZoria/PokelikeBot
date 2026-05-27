@@ -1,13 +1,21 @@
 import pyautogui
 import time
+import keyboard
 
-print("--- MODO BUSCADOR DE COORDENADAS ---")
-print("Posicioná el mouse sobre el objetivo. Control+C en la consola para frenar.\n")
+cambio = True
+while cambio == True:
+    if keyboard.is_pressed('enter'):
+        print(pyautogui.position())
+        time.sleep(1)
 
-try:
-    while True:
-        x, y = pyautogui.position()
-        print(f"Coordenadas actuales -> X: {x}  Y: {y}", end="\r")
-        time.sleep(0.15)
-except KeyboardInterrupt:
-    print("\n\nProceso finalizado con éxito.")
+    if keyboard.is_pressed('m'):
+        cambio = False
+
+    # Arriba izquierda 740, 120
+    # Abajo derecha 1270, 1000
+    # Ancho 530
+    # Alto 880
+
+
+    #Shiny on Question =    954, 805
+
