@@ -14,6 +14,7 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Brother\Pancho\tesseract.exe"
 # ==========================================
 COORD_POKEBOLA = (888, 267)
 COORD_REINICIO = (1885, 140)
+CONTINUE_BTN = (957, 194)
 
 # Rerolls
 REROLL_1_ALTO = (700, 745)
@@ -56,6 +57,7 @@ indice_item_actual = 0
 
 SKIP_ITEM = (965, 660)
 SHINY_MARK = (954, 805)
+LOW_SHINY_MARK = (954, 855)
 
 # POKÉMONES
 COORD_GASTLY = (726, 258)
@@ -63,9 +65,15 @@ COORD_SCYTHER = (820, 257)
 COORD_CHARMANDER = (915, 263)
 
 TREECKO_IMG      = r"C:\Brother\Pancho\Script poke\Sprites\treecko.png"
+HORSEA_IMG         = r"C:\Brother\Pancho\Script poke\Sprites\horsea.png"
 FIRST_MT         = r"C:\Brother\Pancho\Script poke\Sprites\firstMT.png"
 SECOND_MT        = r"C:\Brother\Pancho\Script poke\Sprites\secondMT.png"
-SHINY_REFERENCE = r"C:\Brother\Pancho\Script poke\Sprites\shiny_referencia.png"
+SHINY_REFERENCE  = r"C:\Brother\Pancho\Script poke\Sprites\shiny_referencia.png"
+SKIP_IMG         = r"C:\Brother\Pancho\Script poke\Sprites\skip.png"
+CHAR_FMT         = r"C:\Brother\Pancho\Script poke\Sprites\Charizard MT\firstMT.png"
+CHAR_SMT         = r"C:\Brother\Pancho\Script poke\Sprites\Charizard MT\secondMT.png"
+SCIZ_FMT         = r"C:\Brother\Pancho\Script poke\Sprites\Scizor MT\firstMT.png"
+SCIZ_SMT         = r"C:\Brother\Pancho\Script poke\Sprites\Scizor MT\secondMT.png"
 
 DETECTION_IMG = {
     "item_found":     r"C:\Brother\Pancho\Script poke\Sprites\itemFound.png",
@@ -74,8 +82,27 @@ DETECTION_IMG = {
     "trainer_fight":  r"C:\Brother\Pancho\Script poke\Sprites\trainerFight.png",
     "wild_pokemon":   r"C:\Brother\Pancho\Script poke\Sprites\wildPokemon.png",
     "lobby_image" :   r"C:\Brother\Pancho\Script poke\Sprites\Lobby.png",
-    "catch_pokemon" : r"C:\Brother\Pancho\Script poke\Sprites\catchPokemon.png"
+    "catch_pokemon" : r"C:\Brother\Pancho\Script poke\Sprites\catchPokemon.png",
+    "continue": r"C:\Brother\Pancho\Script poke\Sprites\continue.png"
 }
+
+TRAINERS_IMG = {
+    "aceTrainer": r"C:\Brother\Pancho\Script poke\Sprites\aceTrainer.png",
+    "bugCatcher": r"C:\Brother\Pancho\Script poke\Sprites\bugCatcher.png",
+    "fireSpitter": r"C:\Brother\Pancho\Script poke\Sprites\fireSpitter.png",
+    "fisher": r"C:\Brother\Pancho\Script poke\Sprites\fisher.png",
+    "hiker": r"C:\Brother\Pancho\Script poke\Sprites\hiker.png",
+    "oldGuy": r"C:\Brother\Pancho\Script poke\Sprites\oldGuy.png",
+    "policeman": r"C:\Brother\Pancho\Script poke\Sprites\policeman.png",
+    "scientist": r"C:\Brother\Pancho\Script poke\Sprites\scientist.png",
+    "teamRocket": r"C:\Brother\Pancho\Script poke\Sprites\teamRocket.png",
+    "misteryTrainer": r"C:\Brother\Pancho\Script poke\Sprites\teamRocket.png"
+}
+
+GRASS_IMG = r"C:\Brother\Pancho\Script poke\Sprites\grass.png"
+MARK_IMG = r"C:\Brother\Pancho\Script poke\Sprites\questionMark.png"
+CENTER_IMG = r"C:\Brother\Pancho\Script poke\Sprites\pokeCenter.png"
+ITEM_IMG = r"C:\Brother\Pancho\Script poke\Sprites\itemIcon.png"
 
 # ==========================================
 # 2. FUNCIONES
@@ -100,7 +127,7 @@ def iniciarRun():
     
     time.sleep(0.5)
     
-    seleccionRegion = "hoenn"
+    seleccionRegion = "sinnoh"
     coordenadaClick = region(seleccionRegion)
     
     print(f"Seleccionando región {seleccionRegion.capitalize()}...")
@@ -108,7 +135,7 @@ def iniciarRun():
     time.sleep(0.5)
 
     print("Seleccionando Scyther...")
-    pyautogui.click(COORD_SCYTHER)
+    pyautogui.click(COORD_CHARMANDER)
     time.sleep(0.5)
 
 def battleTower():
@@ -132,7 +159,7 @@ def region(region_name):
     if region_name in texto_extraido.lower():
         return MAPA_REGIONES[region_name]
     else:
-        return COORD_HOENN
+        return COORD_SINNOH
     
 def buscarPokemon(imagen, confidence=0.8, region=None):
     try:
@@ -177,18 +204,18 @@ def seleccionarFirstPokemon():
     treecko_asegurado = False
 
     # 1. Intentar encontrar a Treecko (a la primera o en Reroll)
-    if buscarPokemon(TREECKO_IMG):
+    if buscarPokemon(HORSEA_IMG):
         print("¡Treecko encontrado a la primera!")
         treecko_asegurado = True
     else:
         print("Treecko no está. Iniciando Rerolls...")
-        if Reroll(TREECKO_IMG):
+        if Reroll(HORSEA_IMG):
             print("¡Treecko encontrado en el reroll!")
             treecko_asegurado = True
 
     # 2. Si logramos asegurar a Treecko, buscamos su posición para clickearlo
     if treecko_asegurado:
-        pos = buscarMT(TREECKO_IMG)
+        pos = buscarMT(HORSEA_IMG)
         if pos is not None:
             print("¡Posición de Treecko encontrada! Clickeando...")
             punto_central = pyautogui.center(pos)
@@ -216,7 +243,7 @@ def getEstado():
     return "explorando"
 
 def loopJugable():
-    global indice_item_actual, mt
+    global indice_item_actual, mt, level
     estado = getEstado()
     
     match estado:
@@ -228,14 +255,14 @@ def loopJugable():
         case "move_tutor":
             print("MT...")
             if mt == 1:
-                posicion_mt = buscarMT(FIRST_MT)
+                posicion_mt = buscarMT(CHAR_FMT)
                 if posicion_mt is not None:
                     print("¡Botón de X-Scissor encontrado! Clickeando...")
                     punto_central = pyautogui.center(posicion_mt)
                     pyautogui.click(punto_central)
                     mt += 1
             else:
-                posicion_mt = buscarMT(SECOND_MT)
+                posicion_mt = buscarMT(CHAR_SMT)
                 if posicion_mt is not None:
                     print("¡Botón de Megahorn encontrado! Clickeando...")
                     punto_central = pyautogui.center(posicion_mt)
@@ -244,7 +271,7 @@ def loopJugable():
 
         case "shiny_detected":
             print("SHINY!!")
-            pyautogui.click(SHINY_MARK)
+            hacer_click_doble_zona(SHINY_MARK, LOW_SHINY_MARK)
             time.sleep(0.5)
 
         case "trainer_fight":
@@ -274,13 +301,14 @@ def loopJugable():
                     print("¡Haciendo click en el Pokémon Shiny!")
                     punto_central = pyautogui.center(pos_shiny)
                     pyautogui.click(punto_central)
-                else:
-                    print("Error: Se detectó el Shiny pero se perdió su posición. Clickeando por defecto...")
-                    pyautogui.click(COORD_POKEBOLA)
+                
             
             else:
                 print("No salió ningún Shiny en los rerolls. Avanzando con Pokémon normal...")
-                pyautogui.click(COORD_POKEBOLA)
+                pos_shiny = buscarMT(SKIP_IMG)
+                if pos_shiny is not None:
+                    punto_central = pyautogui.center(pos_shiny)
+                    pyautogui.click(punto_central)
             
 
 
@@ -301,8 +329,13 @@ def loopJugable():
             # Una pausa crucial para evitar que vuelva a detectar 'lobby_image' antes de que cambie la pantalla
             time.sleep(1.0) 
 
+        case "continue":
+                pyautogui.click(CONTINUE_BTN)
+                time.sleep(1)
+                iniciarRun()
+                level = 1
+                
         case _:
-            # Para evitar sobrecargar la CPU cuando está "explorando"
             time.sleep(0.2)
 
 # ==========================================

@@ -14,7 +14,6 @@ COORD_REINICIO = (1885, 140)
 # Primer botón (Reroll 1)
 REROLL_1_ALTO = (700, 745)
 REROLL_1_BAJO = (700, 795)
-
 # Segundo botón (Reroll 2)
 REROLL_2_ALTO = (960, 745)
 REROLL_2_BAJO = (960, 795)
@@ -23,7 +22,7 @@ REROLL_2_BAJO = (960, 795)
 REROLL_3_ALTO = (1210, 745)
 REROLL_3_BAJO = (1210, 795)
 
-FOTO_SHINY = "shiny_referencia.png" 
+SHINY_REFERENCE  = r"C:\Brother\Pancho\Script poke\Sprites\shiny_referencia.png" 
 
 # =========================================================================
 # 2. FUNCIONES
@@ -33,7 +32,7 @@ def buscar_shiny_en_pantalla():
     captura_np = np.array(captura)
     captura_gris = cv2.cvtColor(captura_np, cv2.COLOR_RGB2GRAY)
     
-    plantilla = cv2.imread(FOTO_SHINY, 0)
+    plantilla = cv2.imread(SHINY_REFERENCE, 0)
     if plantilla is None:
         print("[!] Alerta: No se encuentra 'shiny_referencia.png'. El bot asume que NO hay shiny.")
         return False
